@@ -69,18 +69,23 @@ std::string VectorToStr(const std::vector<std::string>& codes) {
   return code;
 }
 
+void InputCode(std::string& code) {
+  std::cout << "Input your code: ";
+  std::getline(std::cin, code);
+}
+
+void OutputResult(std::string& code, const std::vector<std::string>& codes);
+
 int main() {
   std::ios::sync_with_stdio(false);
   std::string code;
-
-  std::cout << "Input your code: ";
-  getline(std::cin, code);
-
+  InputCode(code);
   RemoveUnusedSymbols(code);
   AddExtraNulls(code);
+  OutputResult(code, ProcessSegments(SplitInSegments(code)));
+}
 
-  std::vector<std::string> codes = ProcessSegments(SplitInSegments(code));
-
+void OutputResult(std::string& code, const std::vector<std::string>& codes) {
   code = VectorToStr(codes);
-  std::cout << "Your code: " << code;
+  std::cout << "Your code: " << VectorToStr(codes);
 }
