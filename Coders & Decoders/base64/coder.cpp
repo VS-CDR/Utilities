@@ -20,9 +20,9 @@ int Transfer(int arg, int& k, int radix) {
   return res;
 }
 
-void DecodeTable(const std::string& str, std::vector<int>& code, bool decode = true) {
+void DecodeTable(std::string_view str, std::vector<int>& code, bool decode = true) {
   if (decode) {
-    for (unsigned i = 0; i < str.length(); ++i) {
+    for (std::size_t i = 0; i < str.length(); ++i) {
       if (isalpha(str[i])) {
         if (str[i] > 95) {
           code[i] = str[i] - 71;
@@ -41,7 +41,7 @@ void DecodeTable(const std::string& str, std::vector<int>& code, bool decode = t
     }
   } else {
     for (std::size_t i = 0; i < str.length(); ++i) {
-      code[i] = str[i];
+      code[i] = static_cast<unsigned char>(str[i]);
     }
   }
 }
@@ -70,7 +70,7 @@ void TransferToAscii(int end,
   }
 }
 
-void TransferToBase64(int& end,
+void TransferToBase64(int end,
                       std::vector<int>& code,
                       std::vector<int>& bin,
                       int r,
@@ -98,7 +98,7 @@ void TransferToBase64(int& end,
   }
 }
 
-int TransferToBin(std::string& str,
+int TransferToBin(std::string_view str,
                   std::vector<int>& code,
                   std::vector<int>& bin,
                   int arg) {
@@ -214,6 +214,4 @@ int main() {
     }
   }
   std::cout << "It's done!" << '\n' << "You could close this app" << "\n";
-  std::cin.get();
-  std::cin.get();
 }
