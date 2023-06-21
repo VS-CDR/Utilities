@@ -16,7 +16,7 @@ int Transfer(int byte, int radix) {
 }
 
 void Decompress(std::vector<std::string>& dec, int arg) {
-  for (int i = static_cast<int>(dec.size() - 1); i >= 0; --i) {
+  for (int i = static_cast<int>(dec.size()) - 1; i >= 0; --i) {
     arg %= 2;
     int cnt = stoi(dec[i]);
     dec[i].clear();
@@ -43,7 +43,7 @@ void DeleteNull(std::string& str) {
   }
 }
 
-std::vector<std::string> InDEC(const std::string& str) {
+std::vector<std::string> InDEC(std::string_view str) {
   std::vector<std::string> res;
   int combo;
   int p;
@@ -67,7 +67,7 @@ void DecodeAndOtput(const std::vector<std::string>& dec) {
   int isfull = static_cast<int>(res.size()) % 8;
   if (isfull) {
     int cntnon = isfull;
-    for (int j = static_cast<int>(res.size()) - 1; --cntnon >= 0; --j) {
+    for (std::size_t j = res.size() - 1; --cntnon >= 0; --j) {
       symb += res[j];
     }
     auto symbol = static_cast<unsigned char>(Transfer(stoi(symb), 10));
@@ -85,23 +85,36 @@ void DecodeAndOtput(const std::vector<std::string>& dec) {
   std::cout << std::endl;
 }
 
+void InputCode(std::string& code) {
+  std::cout << "Input your code: ";
+  std::getline(std::cin, code);
+}
+
+void RemoveSpaces(std::string& str);
+
+int FirstBit(std::string& code) {
+  int first_bit = code[0] == '0' ? 0 : 1;
+  code.erase(0, 1);
+  return first_bit;
+}
+
 int main() {
   std::ios::sync_with_stdio(false);
 //  SetConsoleCP(1251); SetConsoleOutputCP(1251);
-  std::string str;
-  getline(std::cin, str);
+  std::string code;
+  InputCode(code);
+  int first_bit = FirstBit(code);
+  RemoveSpaces(code);
+  DeleteNull(code);
+  std::vector<std::string> dec = InDEC(code);
+  Decompress(dec, first_bit);
+  DecodeAndOtput(dec);
+}
 
-  int first_bit = str[0] == '0' ? 0 : 1;
-  str.erase(0, 1);
+void RemoveSpaces(std::string& str) {
   for (std::size_t i = 0; i < str.size(); ++i) {
     if (str[i] == ' ') {
       str.erase(i, 1);
     }
   }
-
-  DeleteNull(str);
-  std::vector<std::string> dec = InDEC(str);
-
-  Decompress(dec, first_bit);
-  DecodeAndOtput(dec);
 }
