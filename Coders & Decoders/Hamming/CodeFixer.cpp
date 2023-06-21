@@ -17,7 +17,7 @@ int FindMistake(std::string_view input) {
   return mistake;
 }
 
-void OutRes(std::string_view input, std::string& res) {
+void OutputFixed(std::string_view input, std::string& res) {
   int bit = 1;
   std::string info;
   for (int i = 0; i < kBlockSize; ++i) {
@@ -67,7 +67,7 @@ void InputCode(std::string& input) {
   std::getline(std::cin, input);
 }
 
-void OutputResult(std::string_view res);
+void OutputDecoded(std::string_view res);
 
 void ChooseOptions(std::string& res) {
   std::cout << '\n' << "Split in eights(8): y/n?" << '\n';
@@ -91,7 +91,7 @@ std::string ProcessCode(std::vector<std::string>& parts) {
     int mistake = FindMistake(str);
     if (std::ranges::all_of(str, [](char c) { return c == '0' || c == '1'; })) {
       Fix(mistake, str);
-      OutRes(str, res);
+      OutputFixed(str, res);
     } else {
       std::cout << "Invalid code";
     }
@@ -108,10 +108,10 @@ int main() {
   PrepareCode(parts, input);
   std::string res = ProcessCode(parts);
   ChooseOptions(res);
-  OutputResult(res);
+  OutputDecoded(res);
 }
 
-void OutputResult(std::string_view res) {
+void OutputDecoded(std::string_view res) {
   for (std::size_t i = 0; i < res.length(); ++i) {
     int pow = 7;
     int code = 0;
