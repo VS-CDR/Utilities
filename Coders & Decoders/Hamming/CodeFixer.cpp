@@ -17,15 +17,6 @@ int FindMistake(std::string_view input) {
   return mistake;
 }
 
-bool CheckTheDigits(std::string_view input) {
-  for (int i = 0; i < kBlockSize; ++i) {
-    if (input[i] != '0' && input[i] != '1') {
-      return false;
-    }
-  }
-  return true;
-}
-
 void OutRes(std::string_view input, std::string& res) {
   int bit = 1;
   std::string info;
@@ -41,9 +32,9 @@ void OutRes(std::string_view input, std::string& res) {
 }
 
 void Fix(int mistake, std::string& input) {
-  if (mistake) {
+  if (mistake != 0) {
     input[mistake - 1] ^= '0' ^ '1';
-    if (FindMistake(input)) {
+    if (FindMistake(input) != 0) {
       std::cout << "Invalid code";
     }
   }
@@ -60,9 +51,9 @@ void SplitInParts(std::vector<std::string>& parts, std::string_view input) {
 
 void PrepareCode(std::vector<std::string>& parts, std::string& input) {
   std::cout << "Are there any separating spaces: y/n?" << '\n';
-  char c;
-  std::cin >> c;
-  if (c == 'n') {
+  char choose;
+  std::cin >> choose;
+  if (choose == 'n') {
     for (size_t i = kBlockSize; i < input.length(); i += 16) {
       input.insert(i, " ");
     }
@@ -72,47 +63,55 @@ void PrepareCode(std::vector<std::string>& parts, std::string& input) {
 }
 
 void InputCode(std::string& input) {
+  std::cout << "Input your code: ";
   std::getline(std::cin, input);
 }
 
-int main() {
-  std::ios::sync_with_stdio(false);
-//  SetConsoleCP(1251); SetConsoleOutputCP(1251);
+void OutputResult(std::string_view res);
 
-  std::cout << "Input your code: ";
+void ChooseOptions(std::string& res) {
+  std::cout << '\n' << "Split in eights(8): y/n?" << '\n';
+  char choose;
+  std::cin >> choose;
+  if (choose == 'y') {
+    for (std::size_t i = 8; i < res.length(); i += 9) {
+      res.insert(i, " ");
+    }
+    std::cout << "Output the result in file: y/n?" << '\n';
+    std::cin >> choose;
+    if (choose == 'y') {
+      freopen("res.txt", "w", stdout);
+    }
+  }
+}
 
-  std::string input;
-  InputCode(input);
-  std::vector<std::string> parts(input.length() / kBlockSize);
-
-  PrepareCode(parts, input);
-
+std::string ProcessCode(std::vector<std::string>& parts) {
   std::string res;
   for (auto& str : parts) {
     int mistake = FindMistake(str);
-    if (CheckTheDigits(str)) {
+    if (std::ranges::all_of(str, [](char c) { return c == '0' || c == '1'; })) {
       Fix(mistake, str);
       OutRes(str, res);
     } else {
       std::cout << "Invalid code";
     }
   }
+  return res;
+}
 
-  std::cout << '\n' << "Split in eights(8): y/n?" << '\n';
+int main() {
+  std::ios::sync_with_stdio(false);
+//  SetConsoleCP(1251); SetConsoleOutputCP(1251);
+  std::string input;
+  InputCode(input);
+  std::vector<std::string> parts(input.length() / kBlockSize);
+  PrepareCode(parts, input);
+  std::string res = ProcessCode(parts);
+  ChooseOptions(res);
+  OutputResult(res);
+}
 
-  char c;
-  std::cin >> c;
-  if (c == 'y') {
-    for (std::size_t i = 8; i < res.length(); i += 9) {
-      res.insert(i, " ");
-    }
-    std::cout << "Output the result in file: y/n?" << '\n';
-    std::cin >> c;
-    if (c == 'y') {
-      freopen("res.txt", "w", stdout);
-    }
-  }
-
+void OutputResult(std::string_view res) {
   for (std::size_t i = 0; i < res.length(); ++i) {
     int pow = 7;
     int code = 0;
