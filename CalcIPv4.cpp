@@ -40,7 +40,7 @@ void Print(const int* byte) {
   for (int i = 0; i < kNumOfQuadrants; ++i) {
     std::cout << byte[i];
     if (i != 3) {
-      std::cout << ".";
+      std::cout << '.';
     }
   }
 }
@@ -50,7 +50,7 @@ void Info(const int* byte) {
   for (int i = 0; i < kNumOfQuadrants; ++i) {
     std::cout << FormOut(Transfer(byte[i], 2));
     if (i != 3) {
-      std::cout << ".";
+      std::cout << '.';
     }
   }
   std::cout.unsetf(std::ios::dec);
@@ -63,68 +63,65 @@ void Info(const int* byte) {
   Print(byte);
   std::cout.unsetf(std::ios::oct);
   std::cout.setf(std::ios::dec);
+  std::cout << std::endl;
 }
 
+void PrintCroppedAddress(int begin, int end, const std::array<int, 32>& arr);
 void CIDR(const int* byte, int cidr) {
   std::array<int, 32> ip{};
+
   for (int i = 0; i < kNumOfQuadrants; ++i) {
-    for (int j = i * 8; j < 8 * (i + 1); ++j) {
+    for (int j = i * 8; j < (i + 1) * 8; ++j) {
       int octet = Transfer(byte[i], 2) % FastPow(10, 8 - (j % 8));
-      int div = FastPow(10, 7 - (j % 8));
+      int div = FastPow(10, 8 - 1 - (j % 8));
       ip[j] = octet / div;
     }
   }
+
   std::cout << '\n' << "Net ID = ";
-  for (int i = 0; i < cidr; ++i) {
-    if (i % 8 == 0 && i != 0) { std::cout << '.'; }
-    std::cout << ip[i];
-  }
+  PrintCroppedAddress(0, cidr, ip);
   std::cout << '\n' << "Host ID = ";
-  for (int i = cidr; i < 32; ++i) {
-    if (i % 8 == 0) { std::cout << '.'; }
-    std::cout << ip[i];
+  PrintCroppedAddress(cidr, 32, ip);
+}
+
+void PrintCroppedAddress(int begin, int end, const std::array<int, 32>& arr) {
+  for (int i = begin; i < end; ++i) {
+    if (i % 8 == 0 && i != 0) { std::cout << '.'; }
+    std::cout << arr[i];
   }
 }
 
 void ClassOfIP(const int* byte) {
+  const std::string common_address_info("!Common address!");
+  const std::string unique_address_info("Unique address");
   if (byte[0] < 128) {
-    if (byte[0] == 10) {
-      std::cout << '\n' << "!Common adress!";
-    } else {
-      std::cout << '\n' << "Unic adress";
-    }
-    std::cout << '\n' << "A class:"
+    std::cout << (byte[0] == 10 ? common_address_info : unique_address_info)
+              << '\n' << "A class:"
               << '\n' << "Net ID = "
               << FormOut(Transfer(byte[0], 2))
               << '\n' << "Host ID = ";
     for (int i = 1; i < kNumOfQuadrants; ++i) {
       std::cout << FormOut(Transfer(byte[i], 2));
-      if (i != kNumOfQuadrants - 1) { std::cout << "."; }
+      if (i != kNumOfQuadrants - 1) { std::cout << '.'; }
     }
   } else if (byte[0] < 192) {
-    if (byte[0] == 172 && byte[1] >= 16 && byte[1] <= 31) {
-      std::cout << '\n' << "!Common adress!";
-    } else {
-      std::cout << '\n' << "Unic adress";
-    }
-    std::cout << '\n' <<"B class:"
-              << '\n' <<"Net ID = " << FormOut(Transfer(byte[0], 2))
+    std::cout << (byte[0] == 172 && byte[1] >= 16 && byte[1] <= 31
+                  ? common_address_info : unique_address_info)
+              << '\n' << "B class:"
+              << '\n' << "Net ID = " << FormOut(Transfer(byte[0], 2))
               << '.' << FormOut(Transfer(byte[1], 2))
               << '\n' << "Host ID = " << FormOut(Transfer(byte[2], 2))
               << "." << FormOut(Transfer(byte[3], 2));
   } else if (byte[0] < 224) {
-    if (byte[0] == 192 && byte[1] == 168) {
-      std::cout << '\n' << "!Common adress!";
-    } else {
-      std::cout << '\n' << "Unic adress";
-    }
-    std::cout << '\n' << "C class:"
+    std::cout << (byte[0] == 192 && byte[1] == 168 ? common_address_info
+                                                   : unique_address_info)
+              << '\n' << "C class:"
               << '\n' << "Net ID = ";
     for (int i = 0; i < kNumOfQuadrants - 1; ++i) {
       std::cout << FormOut(Transfer(byte[i], 2));
-      if (i != 2) { std::cout << "."; }
+      if (i != 2) { std::cout << '.'; }
     }
-    std::cout << '\n' <<"Host ID = " << FormOut(Transfer(byte[3], 2));
+    std::cout << '\n' << "Host ID = " << FormOut(Transfer(byte[3], 2));
   } else {
     std::cout << "D/E class";
   }
@@ -160,7 +157,7 @@ void InputAndProcessData(std::array<int, kNumOfQuadrants>& byte) {
   }
 }
 
-void ChooseOptions(std::array<int, kNumOfQuadrants>& byte);
+void ChooseOptions(const std::array<int, kNumOfQuadrants>& byte);
 
 int main() {
   std::ios::sync_with_stdio(false);
@@ -170,8 +167,8 @@ int main() {
   ChooseOptions(byte);
 }
 
-void ChooseOptions(std::array<int, kNumOfQuadrants>& byte) {
-  std::cout << '\n' << "CIDR y/n" << std::endl;
+void ChooseOptions(const std::array<int, kNumOfQuadrants>& byte) {
+  std::cout << "CIDR y/n" << std::endl;
   char cmd = ' ';
   std::cin >> cmd;
   if (cmd == 'y') {
@@ -182,5 +179,4 @@ void ChooseOptions(std::array<int, kNumOfQuadrants>& byte) {
   } else {
     ClassOfIP(byte.data());
   }
-  std::cout << std::endl;
 }
