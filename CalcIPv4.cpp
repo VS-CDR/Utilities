@@ -92,10 +92,10 @@ void PrintCroppedAddress(int begin, int end, const std::array<int, 32>& arr) {
 }
 
 void ClassOfIP(const int* byte) {
-  const std::string common_address_info("!Common address!");
-  const std::string unique_address_info("Unique address");
+  const std::string kCommonAddressInfo("!Common address!");
+  const std::string kUniqueAddressInfo("Unique address");
   if (byte[0] < 128) {
-    std::cout << (byte[0] == 10 ? common_address_info : unique_address_info)
+    std::cout << (byte[0] == 10 ? kCommonAddressInfo : kUniqueAddressInfo)
               << '\n' << "A class:"
               << '\n' << "Net ID = "
               << FormOut(Transfer(byte[0], 2))
@@ -106,15 +106,15 @@ void ClassOfIP(const int* byte) {
     }
   } else if (byte[0] < 192) {
     std::cout << (byte[0] == 172 && byte[1] >= 16 && byte[1] <= 31
-                  ? common_address_info : unique_address_info)
+                  ? kCommonAddressInfo : kUniqueAddressInfo)
               << '\n' << "B class:"
               << '\n' << "Net ID = " << FormOut(Transfer(byte[0], 2))
               << '.' << FormOut(Transfer(byte[1], 2))
               << '\n' << "Host ID = " << FormOut(Transfer(byte[2], 2))
               << "." << FormOut(Transfer(byte[3], 2));
   } else if (byte[0] < 224) {
-    std::cout << (byte[0] == 192 && byte[1] == 168 ? common_address_info
-                                                   : unique_address_info)
+    std::cout << (byte[0] == 192 && byte[1] == 168 ? kCommonAddressInfo
+                                                   : kUniqueAddressInfo)
               << '\n' << "C class:"
               << '\n' << "Net ID = ";
     for (int i = 0; i < kNumOfQuadrants - 1; ++i) {
