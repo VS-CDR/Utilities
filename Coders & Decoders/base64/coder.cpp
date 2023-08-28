@@ -13,7 +13,7 @@ int Transfer(int arg, int& k, int radix) {
   if (arg < 0) {
     arg += 256;
   }
-  for (k = 1; arg != 0; arg /= radix, k *= 10) {
+  for (k = 1; arg > 0; arg /= radix, k *= 10) {
     res += (arg % radix) * k;
   }
   return res;
