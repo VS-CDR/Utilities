@@ -44,7 +44,7 @@ void TransferToASCII(std::vector<int>& code,
                      std::vector<int>& bin,
                      std::size_t radix) {
   for (std::size_t i = 0; i < code.size(); ++i) {
-    for (std::size_t j = i * radix; j < (i * radix) + radix; ++j) {
+    for (std::size_t j = i * radix; j < (i + 1) * radix; ++j) {
       for (int bin_pow = 1 << (radix - 1); bin_pow > 0; bin_pow /= 2, ++j) {
         code[i] += bin_pow * bin[j];
       }
@@ -58,7 +58,7 @@ void TransferToBase64(std::size_t end,
                       std::size_t r,
                       std::string& res) {
   for (std::size_t i = 0; i <= end / r; ++i) {
-    for (std::size_t j = i * r; j < (i * r) + r && j < end; ++j) {
+    for (std::size_t j = i * r; j < (i + 1) * r && j < end; ++j) {
       for (int bin_p = 1 << (r - 1); bin_p > 0 && j < end; bin_p /= 2, ++j) {
         code[i] += bin_p * bin[j];
       }
