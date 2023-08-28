@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include "fastmath.hpp"
+
 int Transfer(int arg, int& k, int radix) {
   int res = 0;
   if (arg < 0) {
@@ -20,16 +22,18 @@ int Transfer(int arg, int& k, int radix) {
   return res;
 }
 
-void DecodeTable(std::string_view str, std::vector<int>& code, bool decode = true) {
+void DecodeTable(std::string_view str,
+                 std::vector<int>& code,
+                 bool decode = true) {
   if (decode) {
     for (std::size_t i = 0; i < str.length(); ++i) {
-      if (isalpha(str[i])) {
+      if (isalpha(str[i]) != 0) {
         if (str[i] > 95) {
           code[i] = str[i] - 71;
         } else {
           code[i] = str[i] - 65;
         }
-      } else if (isdigit(str[i])) {
+      } else if (isdigit(str[i]) != 0) {
         code[i] = str[i] + 4;
       } else if (str[i] == '=') {
         code[i] = 0;
@@ -46,42 +50,31 @@ void DecodeTable(std::string_view str, std::vector<int>& code, bool decode = tru
   }
 }
 
-void SplitIntoDigits(int& p, int n, std::vector<int>& bin, int& i) {
-  while (p) {
-    bin[i++] = n / p;
-    n %= p;
-    p /= 10;
-  }
-}
-
-void TransferToAscii(int end,
-                     std::vector<int>& code,
+void TransferToASCII(std::vector<int>& code,
                      std::vector<int>& bin,
-                     int r) {
-  for (int i = 0; i < end / r; ++i) {
-    code[i] = 0;
-    for (int j = i * r; j < i * r + r; ++j) {
-      int p = 1 << (r - 1);
-      while (p) {
-        code[i] = code[i] + (p * bin[j++]);
-        p >>= 1;
+                     std::size_t radix) {
+  for (std::size_t i = 0; i < code.size(); ++i) {
+    for (std::size_t j = i * radix; j < (i * radix) + radix; ++j) {
+      int bin_power = 1 << (radix - 1);
+      while (bin_power > 0) {
+        code[i] = code[i] + (bin_power * bin[j++]);
+        bin_power >>= 1;
       }
     }
   }
 }
 
-void TransferToBase64(int end,
+void TransferToBase64(std::size_t end,
                       std::vector<int>& code,
                       std::vector<int>& bin,
-                      int r,
+                      std::size_t r,
                       std::string& res) {
-  for (int i = 0; i <= end / r; ++i) {
-    code[i] = 0;
-    for (int j = i * r; j < i * r + r && j < end; ++j) {
-      int p = 1 << (r - 1);
-      while (p && j < end) {
-        code[i] = code[i] + (p * bin[j++]);
-        p >>= 1;
+  for (std::size_t i = 0; i <= end / r; ++i) {
+    for (std::size_t j = i * r; j < (i * r) + r && j < end; ++j) {
+      int bin_power = 1 << (r - 1);
+      while (bin_power > 0 && j < end) {
+        code[i] = code[i] + (bin_power * bin[j++]);
+        bin_power >>= 1;
       }
       if (code[i] < 26) {
         res += static_cast<char>(code[i] + 65);
@@ -98,39 +91,128 @@ void TransferToBase64(int end,
   }
 }
 
-int TransferToBin(std::string_view str,
-                  std::vector<int>& code,
-                  std::vector<int>& bin,
-                  int arg) {
-  int p = 1;
-  for (int i = 0; i < static_cast<int>(str.length()); ++i) {
-    code[i] = Transfer(code[i], p, 2);
-    p /= 10;
-    for (int j = i * arg; j < arg + i * arg; ++j) {
-      if (p < pow(10, arg)) {
-        if (!p && isalpha(str[i])) {
-          int lim = j;
+void SplitIntoDigits(int& dec_power,
+                     int n,
+                     std::vector<int>& bin,
+                     std::size_t& ind) {
+  while (dec_power > 0) {
+    bin[ind++] = n / dec_power;
+    n %= dec_power;
+    dec_power /= 10;
+  }
+}
+
+void TransferToBin(std::string_view str,
+                          std::vector<int>& code,
+                          std::vector<int>& bin,
+                          int arg) {
+  int dec_power = 1;
+  for (std::size_t i = 0; i < str.length(); ++i) {
+    code[i] = Transfer(code[i], dec_power, 2);
+    dec_power /= 10;
+    for (std::size_t j = i * arg; j < arg + i * arg; ++j) {
+      if (dec_power < FastPow(10, arg)) {
+        if (!dec_power && (isalpha(str[i]) != 0)) {
+          std::size_t lim = j;
           while (j < lim + arg) {
             bin[j++] = 0;
           }
         } else {
-          int copy_p = p;
+          int copy_p(dec_power);
           int cnt = 0;
-          while (copy_p) {
+          while (copy_p > 0) {
             copy_p /= 10;
             cnt++;
           }
           for (int r = 0; r < arg - cnt; ++r) {
             bin[j++] = 0;
           }
-          SplitIntoDigits(p, code[i], bin, j);
+          SplitIntoDigits(dec_power, code[i], bin, j);
         }
-      } else if (p) {
-        SplitIntoDigits(p, code[i], bin, j);
+      } else if (dec_power > 0) {
+        SplitIntoDigits(dec_power, code[i], bin, j);
       }
     }
   }
-  return (static_cast<int>(str.length()) * arg);
+}
+
+void AddExtraSymbolsInTheEnd(std::size_t end, std::string& res);
+
+void Format(std::string& str);
+void MakeResultString(std::string& res,
+                      const std::vector<int>& code);
+
+void OutputResult(std::string& input,
+                  const std::string& output_choose,
+                  const std::string& res,
+                  std::string filename = "output.txt");
+int main() {
+// for Windows
+//  SetConsoleCP(1251);
+//  SetConsoleOutputCP(1251);
+  std::ios::sync_with_stdio(false);
+
+  std::string str;
+  std::string input;
+  std::string res;
+  const std::string kOutputChoose =
+      "Where to output the result: file or console (press f or c)?\n"
+      "It's recommended to use a file because console may not have enough buffer size to display all text";
+
+  std::cout << "encode or decode?" << std::endl;
+  getline(std::cin, input);
+  std::cout << "Input your string" << std::endl;
+  getline(std::cin, str);
+
+  if (input == "de") {
+    std::vector<int> code(str.length());
+    std::vector<int> bin(str.length() * 6);
+
+    DecodeTable(str, code);
+    TransferToBin(str, code, bin, 6);
+    code.assign(str.length() * 3/4, 0);   // 6/8 = 3/4
+    TransferToASCII(code, bin, 8);
+
+    MakeResultString(res, code);
+    OutputResult(input, kOutputChoose, res, "decryption.txt");
+  } else if (input == "en") {
+    std::vector<int> code(str.length() * 2);
+    std::vector<int> bin(str.length() * 8);
+
+    DecodeTable(str, code, false);
+    TransferToBin(str, code, bin, 8);
+    std::size_t end = str.length() * 8;
+    code.assign(end / 6, 0);
+
+    TransferToBase64(end, code, bin, 6, res);
+    AddExtraSymbolsInTheEnd(end, res);
+
+    OutputResult(input, kOutputChoose, res, "encryption.txt");
+  }
+  std::cout << "You could close this app." << std::endl;
+}
+
+void OutputResult(std::string& input,
+                  const std::string& output_choose,
+                  const std::string& res,
+                  std::string filename) {
+  std::cout << output_choose << std::endl;
+  std::getline(std::cin, input);
+  if (input == "f") {
+    std::fstream fout(filename, std::ios::out);
+    fout << res;
+    fout.close();
+  } else if (input == "c") {
+    std::cout << res << std::endl;
+  }
+}
+
+void AddExtraSymbolsInTheEnd(std::size_t end, std::string& res) {
+  if (end % 6 != 0) {
+    for (std::size_t i = 1; i < 6 - (end % 6); i <<= 1) {
+      res += '=';
+    }
+  }
 }
 
 void Format(std::string& str) {
@@ -141,77 +223,11 @@ void Format(std::string& str) {
   }
 }
 
-int main() {
-// for Windows
-//  SetConsoleCP(1251);
-//  SetConsoleOutputCP(1251);
-  std::ios::sync_with_stdio(false);
-
-  int end;
-  std::string str;
-  std::string output_choose =
-      "Where to output the result: file or console (press f or c)?\nIt's recommended to use a file because console may not have enough buffer size to display all text";
-
-  std::cout << "encode or decode?\n";
-  getline(std::cin, str);
-  std::cout << "Input your string\n";
-
-  if (str == "de") {
-    getline(std::cin, str);
-    std::vector<int> code(str.length());
-    std::vector<int> bin(str.length() * 6);
-
-    DecodeTable(str, code);
-    end = TransferToBin(str, code, bin, 6);
-    TransferToAscii(end, code, bin, 8);
-
-    std::cout << output_choose << "\n";
-
-    getline(std::cin, str);
-    if (str == "f") {
-      std::fstream fout("decryption.txt", std::ios::out);
-      str.clear();
-      for (int i = 0; i < end >> 3; ++i) {
-        str += static_cast<char>(code[i]);
-      }
-      Format(str);
-      fout << str;
-      fout.close();
-    } else if (str == "c") {
-      str.clear();
-      for (int i = 0; i < end >> 3; ++i) {
-        str += static_cast<char>(code[i]);
-      }
-      Format(str);
-      std::cout << str << "\n";
-    }
-  } else if (str == "en") {
-    getline(std::cin, str);
-    std::vector<int> code(str.length() << 1, 0);
-    std::vector<int> bin(str.length() << 3);
-
-    DecodeTable(str, code, false);
-    end = TransferToBin(str, code, bin, 8);
-
-    std::string res;
-    TransferToBase64(end, code, bin, 6, res);
-
-    if (end % 6) {
-      for (int i = 1; i < 6 - (end % 6); i <<= 1) {
-        res += "=";
-      }
-    }
-
-    std::cout << output_choose << "\n";
-    getline(std::cin, str);
-
-    if (str == "f") {
-      std::fstream fout("decryption.txt", std::ios::out);
-      fout << res;
-      fout.close();
-    } else if (str == "c") {
-      std::cout << res << "\n";
-    }
+void MakeResultString(std::string& res,
+                      const std::vector<int>& code) {
+  res.clear();
+  for (int byte : code) {
+    res += static_cast<char>(byte);
   }
-  std::cout << "It's done!" << '\n' << "You could close this app" << "\n";
+  Format(res);
 }
