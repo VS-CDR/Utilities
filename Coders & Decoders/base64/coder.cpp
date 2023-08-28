@@ -110,7 +110,7 @@ void TransferToBin(std::string_view str,
   for (std::size_t i = 0; i < str.length(); ++i) {
     code[i] = Transfer(code[i], dec_power, 2);
     dec_power /= 10;
-    for (std::size_t j = i * arg; j < arg + i * arg; ++j) {
+    for (std::size_t j = i * arg; j < (i * arg) + arg; ++j) {
       if (dec_power < FastPow(10, arg)) {
         if (!dec_power && (isalpha(str[i]) != 0)) {
           std::size_t lim = j;
