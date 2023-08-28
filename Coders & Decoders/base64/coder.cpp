@@ -13,11 +13,8 @@ int Transfer(int arg, int& k, int radix) {
   if (arg < 0) {
     arg += 256;
   }
-  k = 1;
-  while (arg != 0) {
+  for (k = 1; arg != 0; arg /= radix, k *= 10) {
     res += (arg % radix) * k;
-    k *= 10;
-    arg /= radix;
   }
   return res;
 }
@@ -48,10 +45,8 @@ void TransferToASCII(std::vector<int>& code,
                      std::size_t radix) {
   for (std::size_t i = 0; i < code.size(); ++i) {
     for (std::size_t j = i * radix; j < (i * radix) + radix; ++j) {
-      int bin_power = 1 << (radix - 1);
-      while (bin_power > 0) {
-        code[i] = code[i] + (bin_power * bin[j++]);
-        bin_power >>= 1;
+      for (int bin_pow = 1 << (radix - 1); bin_pow > 0; bin_pow /= 2, ++j) {
+        code[i] += bin_pow * bin[j];
       }
     }
   }
@@ -64,10 +59,8 @@ void TransferToBase64(std::size_t end,
                       std::string& res) {
   for (std::size_t i = 0; i <= end / r; ++i) {
     for (std::size_t j = i * r; j < (i * r) + r && j < end; ++j) {
-      int bin_power = 1 << (r - 1);
-      while (bin_power > 0 && j < end) {
-        code[i] = code[i] + (bin_power * bin[j++]);
-        bin_power >>= 1;
+      for (int bin_p = 1 << (r - 1); bin_p > 0 && j < end; bin_p /= 2, ++j) {
+        code[i] += bin_p * bin[j];
       }
       if (code[i] < 26) {
         res += static_cast<char>(code[i] + 65);
@@ -88,10 +81,8 @@ void SplitIntoDigits(int& dec_power,
                      int n,
                      std::vector<int>& bin,
                      std::size_t& ind) {
-  while (dec_power > 0) {
-    bin[ind++] = n / dec_power;
-    n %= dec_power;
-    dec_power /= 10;
+  for (; dec_power > 0; n %= dec_power, dec_power /= 10, ++ind) {
+    bin[ind] = n / dec_power;
   }
 }
 
@@ -105,20 +96,17 @@ void TransferToBin(std::string_view str,
     dec_power /= 10;
     for (std::size_t j = i * arg; j < (i * arg) + arg; ++j) {
       if (dec_power < FastPow(10, arg)) {
-        if (!dec_power && (isalpha(str[i]) != 0)) {
-          std::size_t lim = j;
-          while (j < lim + arg) {
-            bin[j++] = 0;
+        if (dec_power == 0 && (isalpha(str[i]) != 0)) {
+          for (std::size_t lim = j; j < lim + arg; ++j) {
+            bin[j] = 0;
           }
         } else {
-          int copy_p(dec_power);
           int cnt = 0;
-          while (copy_p > 0) {
-            copy_p /= 10;
-            cnt++;
+          for (int copy_p(dec_power); copy_p > 0; copy_p /= 10) {
+            ++cnt;
           }
-          for (int r = 0; r < arg - cnt; ++r) {
-            bin[j++] = 0;
+          for (int r = 0; r < arg - cnt; ++r, ++j) {
+            bin[j] = 0;
           }
           SplitIntoDigits(dec_power, code[i], bin, j);
         }
@@ -138,7 +126,7 @@ void MakeResultString(std::string& res,
 void OutputResult(std::string& input,
                   const std::string& output_choose,
                   const std::string& res,
-                  std::string filename = "output.txt");
+                  const std::string& filename = "output.txt");
 int main() {
 // for Windows
 //  SetConsoleCP(1251);
@@ -187,7 +175,7 @@ int main() {
 void OutputResult(std::string& input,
                   const std::string& output_choose,
                   const std::string& res,
-                  std::string filename) {
+                  const std::string& filename) {
   std::cout << output_choose << std::endl;
   std::getline(std::cin, input);
   if (input == "f") {
