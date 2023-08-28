@@ -6,11 +6,8 @@
 
 int Transfer(int byte, int radix) {
   int res = 0;
-  int k = 1;
-  while (byte != 0) {
+  for (int k = 1; byte != 0; k <<= 1, byte /= radix) {
     res += (byte % radix) * k;
-    k <<= 1;
-    byte /= radix;
   }
   return res;
 }
@@ -33,7 +30,7 @@ void DeleteNull(std::string& str) {
     if (str[i] == '0') {
       ++cnt;
       str.erase(i--, 1);
-    } else if (cnt) {
+    } else if (cnt != 0) {
       i = i + cnt + 1;
       str.insert(i, " ");
       cnt = 0;
@@ -47,7 +44,7 @@ std::vector<std::string> InDEC(std::string_view str) {
   std::vector<std::string> res;
   int combo;
   int p;
-  for (int i = static_cast<int>(str.size() - 1); i >= 0; --i) {
+  for (auto i = static_cast<int>(str.size() - 1); i >= 0; --i) {
     if (str[i] == ' ') {
       combo = 0;
       p = 0;

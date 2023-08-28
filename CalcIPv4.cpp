@@ -14,20 +14,15 @@ const int kMaxValue = 256;
 
 int Transfer(int byte, int radix) {
   int res = 0;
-  int k = 1;
-  while (byte != 0) {
+  for (int k = 1; byte != 0; k *= 10, byte /= radix) {
     res += (byte % radix) * k;
-    k *= 10;
-    byte /= radix;
   }
   return res;
 }
 
 int FormOut(int out) {
   int radix = 0;
-  int tmp = out;
-  while (tmp > 0) {
-    tmp /= 10;
+  for (int tmp = out; tmp > 0; tmp /= 10) {
     ++radix;
   }
   for (int i = radix; i < 8; ++i) {
@@ -105,16 +100,18 @@ void ClassOfIP(const int* byte) {
       if (i != kNumOfQuadrants - 1) { std::cout << '.'; }
     }
   } else if (byte[0] < 192) {
-    std::cout << (byte[0] == 172 && byte[1] >= 16 && byte[1] <= 31
-                  ? kCommonAddressInfo : kUniqueAddressInfo)
+    std::cout << (
+        byte[0] == 172 && byte[1] >= 16 && byte[1] <= 31
+        ? kCommonAddressInfo : kUniqueAddressInfo)
               << '\n' << "B class:"
               << '\n' << "Net ID = " << FormOut(Transfer(byte[0], 2))
               << '.' << FormOut(Transfer(byte[1], 2))
               << '\n' << "Host ID = " << FormOut(Transfer(byte[2], 2))
               << "." << FormOut(Transfer(byte[3], 2));
   } else if (byte[0] < 224) {
-    std::cout << (byte[0] == 192 && byte[1] == 168 ? kCommonAddressInfo
-                                                   : kUniqueAddressInfo)
+    std::cout << (
+        byte[0] == 192 && byte[1] == 168 ? kCommonAddressInfo
+                                         : kUniqueAddressInfo)
               << '\n' << "C class:"
               << '\n' << "Net ID = ";
     for (int i = 0; i < kNumOfQuadrants - 1; ++i) {
