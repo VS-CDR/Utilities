@@ -23,29 +23,22 @@ int Transfer(int arg, int& k, int radix) {
 }
 
 void DecodeTable(std::string_view str,
-                 std::vector<int>& code,
-                 bool decode = true) {
-  if (decode) {
-    for (std::size_t i = 0; i < str.length(); ++i) {
-      if (isalpha(str[i]) != 0) {
-        if (str[i] > 95) {
-          code[i] = str[i] - 71;
-        } else {
-          code[i] = str[i] - 65;
-        }
-      } else if (isdigit(str[i]) != 0) {
-        code[i] = str[i] + 4;
-      } else if (str[i] == '=') {
-        code[i] = 0;
-      } else if (str[i] == '+') {
-        code[i] = 62;
+                 std::vector<int>& code) {
+  for (std::size_t i = 0; i < str.length(); ++i) {
+    if (isalpha(str[i]) != 0) {
+      if (str[i] > 95) {
+        code[i] = str[i] - 71;
       } else {
-        code[i] = 63;
+        code[i] = str[i] - 65;
       }
-    }
-  } else {
-    for (std::size_t i = 0; i < str.length(); ++i) {
-      code[i] = static_cast<unsigned char>(str[i]);
+    } else if (isdigit(str[i]) != 0) {
+      code[i] = str[i] + 4;
+    } else if (str[i] == '=') {
+      code[i] = 0;
+    } else if (str[i] == '+') {
+      code[i] = 62;
+    } else {
+      code[i] = 63;
     }
   }
 }
@@ -103,9 +96,9 @@ void SplitIntoDigits(int& dec_power,
 }
 
 void TransferToBin(std::string_view str,
-                          std::vector<int>& code,
-                          std::vector<int>& bin,
-                          int arg) {
+                   std::vector<int>& code,
+                   std::vector<int>& bin,
+                   int arg) {
   int dec_power = 1;
   for (std::size_t i = 0; i < str.length(); ++i) {
     code[i] = Transfer(code[i], dec_power, 2);
@@ -170,19 +163,18 @@ int main() {
 
     DecodeTable(str, code);
     TransferToBin(str, code, bin, 6);
-    code.assign(str.length() * 3/4, 0);   // 6/8 = 3/4
+    code.assign(str.length() * 3 / 4, 0);   // 6/8 = 3/4
     TransferToASCII(code, bin, 8);
 
     MakeResultString(res, code);
     OutputResult(input, kOutputChoose, res, "decryption.txt");
   } else if (input == "en") {
-    std::vector<int> code(str.length() * 2);
+    std::vector<int> code(str.begin(), str.end());
     std::vector<int> bin(str.length() * 8);
 
-    DecodeTable(str, code, false);
     TransferToBin(str, code, bin, 8);
     std::size_t end = str.length() * 8;
-    code.assign(end / 6, 0);
+    code.assign((end / 6) + 1, 0);
 
     TransferToBase64(end, code, bin, 6, res);
     AddExtraSymbolsInTheEnd(end, res);
@@ -216,9 +208,9 @@ void AddExtraSymbolsInTheEnd(std::size_t end, std::string& res) {
 }
 
 void Format(std::string& str) {
-  for (std::size_t i = 0; i < str.length(); ++i) {
-    if (str[i] == '.') {
-      str.insert(str.begin() + i + 1, '\n');
+  for (auto iter = str.begin(); iter != str.end(); ++iter) {
+    if (*iter == '.') {
+      iter = str.insert(iter + 1, '\n');
     }
   }
 }
