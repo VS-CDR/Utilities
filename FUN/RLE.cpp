@@ -1,5 +1,5 @@
 template<typename T>
-long RLE(std::vector<T>& str) {
+long inplaceRLE(std::vector<T>& str) {
   long ins_pos = 0;
   for (int i = 0; i < std::ssize(str); ++i) {
     auto ch = str[i];
@@ -18,4 +18,18 @@ long RLE(std::vector<T>& str) {
     ++ins_pos;
   }
   return ins_pos;
+}
+
+std::string RLE(std::string_view str) {
+  std::string res;
+  for (int i = 0; i < std::ssize(str); ++i) {
+    auto ch = str[i];
+    int cnt = 1;
+    for (; i + 1 < std::ssize(str) && ch == str[i + 1]; ++i) {
+      ++cnt;
+    }
+    res += ch;
+    res += std::to_string(cnt);
+  }
+  return res;
 }
