@@ -6,3 +6,4 @@ The "Coder & Decoders" folder contains the base64 encoder. Hamming Code encoders
 
 
 The "FUN" folder contains an attempt to implement Rijndael, and a comic decoder for the Siberian cipher.
+UPD: also "FUN" folder contains an implementations of RLE encoding
