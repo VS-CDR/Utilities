@@ -1,4 +1,3 @@
-//#include <windows.h>
 #include <algorithm>
 #include <vector>
 #include <string>
@@ -13,9 +12,9 @@ int Transfer(int byte, int radix) {
 }
 
 void Decompress(std::vector<std::string>& dec, int arg) {
-  for (int i = static_cast<int>(dec.size()) - 1; i >= 0; --i) {
+  for (auto i = static_cast<int>(dec.size()) - 1; i >= 0; --i) {
     arg %= 2;
-    int cnt = stoi(dec[i]);
+    auto cnt = stoi(dec[i]);
     dec[i].clear();
     for (int j = 0; j < cnt; ++j) {
       dec[i].push_back(static_cast<char>(arg + 48));
@@ -62,9 +61,9 @@ void DecodeAndOtput(const std::vector<std::string>& dec) {
   std::string symb;
   std::ranges::for_each(dec, [&res](const auto& elem) { res += elem; });
   int isfull = static_cast<int>(res.size()) % 8;
-  if (isfull) {
+  if (isfull != 0) {
     int cntnon = isfull;
-    for (std::size_t j = res.size() - 1; --cntnon >= 0; --j) {
+    for (auto j = res.size() - 1; --cntnon >= 0; --j) {
       symb += res[j];
     }
     auto symbol = static_cast<unsigned char>(Transfer(stoi(symb), 10));
@@ -97,7 +96,6 @@ int FirstBit(std::string& code) {
 
 int main() {
   std::ios::sync_with_stdio(false);
-//  SetConsoleCP(1251); SetConsoleOutputCP(1251);
   std::string code;
   InputCode(code);
   int first_bit = FirstBit(code);
