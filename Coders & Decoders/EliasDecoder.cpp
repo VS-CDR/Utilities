@@ -30,7 +30,7 @@ void DeleteNull(std::string& str) {
       ++cnt;
       str.erase(i--, 1);
     } else if (cnt != 0) {
-      i = i + cnt + 1;
+      i += cnt + 1;
       str.insert(i, " ");
       cnt = 0;
     } else {
