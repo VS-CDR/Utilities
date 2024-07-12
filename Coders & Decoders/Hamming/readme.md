@@ -1,0 +1,2 @@
+- CodeFixer will help you fix and decode hamming code(15,11).
+- Encoder will translate ASCII code to hamming code(15, 11).
