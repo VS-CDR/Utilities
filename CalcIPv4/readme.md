@@ -1,4 +1,4 @@
-# Example of work
+# Usage example
 
 ## without CIDR
 
