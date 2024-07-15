@@ -1,4 +1,3 @@
-//#include <windows.h> for windows
 #include <cctype>
 #include <cmath>
 #include <fstream>
@@ -6,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "fastmath.hpp"
+#include "../fastmath.hpp"
 
 int Transfer(int arg, int& k, int radix) {
   int res = 0;
@@ -19,8 +18,7 @@ int Transfer(int arg, int& k, int radix) {
   return res;
 }
 
-void DecodeTable(std::string_view str,
-                 std::vector<int>& code) {
+void DecodeTable(std::string_view str, std::vector<int>& code) {
   for (std::size_t i = 0; i < str.length(); ++i) {
     if (isalpha(str[i]) != 0) {
       if (str[i] > 95) {
@@ -120,29 +118,25 @@ void TransferToBin(std::string_view str,
 void AddExtraSymbolsInTheEnd(std::size_t end, std::string& res);
 
 void Format(std::string& str);
-void MakeResultString(std::string& res,
-                      const std::vector<int>& code);
+void MakeResultString(std::string& res, const std::vector<int>& code);
 
 void OutputResult(std::string& input,
                   const std::string& output_choose,
                   const std::string& res,
                   const std::string& filename = "output.txt");
 int main() {
-// for Windows
-//  SetConsoleCP(1251);
-//  SetConsoleOutputCP(1251);
   std::ios::sync_with_stdio(false);
 
   std::string str;
   std::string input;
   std::string res;
   const std::string kOutputChoose =
-      "Where to output the result: file or console (press f or c)?\n"
+      "Where to output the result: file or console (input f or c)?\n"
       "It's recommended to use a file because console may not have enough buffer size to display all text";
 
-  std::cout << "encode or decode?" << std::endl;
+  std::cout << "encode or decode (en/de): ";
   getline(std::cin, input);
-  std::cout << "Input your string" << std::endl;
+  std::cout << "Input your string: ";
   getline(std::cin, str);
 
   if (input == "de") {
