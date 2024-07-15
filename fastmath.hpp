@@ -8,7 +8,7 @@ T FastPow(T a, T n) {
       res *= a;
     }
     a *= a;
-    n >>= 1;
+    n /= 2;
   }
   return res;
 }
