@@ -138,6 +138,9 @@ int main() {
 
   std::string res;
   if (input == "de") {
+    while (str.back() == '=') {
+      str.pop_back();
+    }
     std::vector code(str.length(), 0);
     std::vector bin(str.length() * 6, 0);
 
