@@ -12,14 +12,12 @@ int Transfer(int byte, int radix) {
 }
 
 void Decompress(std::vector<std::string>& dec, int arg) {
-  for (auto i = std::ssize(dec) - 1; i >= 0; --i) {
-    arg %= 2;
+  for (auto i = std::ssize(dec) - 1; i >= 0; --i, arg ^= 1) {
     auto cnt = stoi(dec[i]);
     dec[i].clear();
     for (int j = 0; j < cnt; ++j) {
       dec[i].push_back('0' + arg);
     }
-    ++arg;
   }
 }
 
