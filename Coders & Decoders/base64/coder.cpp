@@ -202,7 +202,6 @@ void Format(std::string& str) {
 
 void MakeResultString(std::string& res,
                       const std::vector<int>& code) {
-  res.clear();
   for (auto byte : code) {
     res += static_cast<char>(byte);
   }
