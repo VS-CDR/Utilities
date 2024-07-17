@@ -121,27 +121,25 @@ void Format(std::string& str);
 void MakeResultString(std::string& res, const std::vector<int>& code);
 
 void OutputResult(std::string& input,
-                  const std::string& output_choose,
-                  const std::string& res,
+                  std::string_view res,
                   const std::string& filename = "output.txt");
 int main() {
   std::ios::sync_with_stdio(false);
-
-  std::string str;
+  
   std::string input;
-  std::string res;
-  const std::string kOutputChoose =
-      "Where to output the result: file or console (input f or c)?\n"
-      "It's recommended to use a file because console may not have enough buffer size to display all text";
-
   std::cout << "encode or decode (en/de): ";
-  getline(std::cin, input);
+  while(input != "en" && input != "de") {
+    getline(std::cin, input);
+  }
+  
+  std::string str;
   std::cout << "Input your string: ";
   getline(std::cin, str);
 
+  std::string res;
   if (input == "de") {
-    std::vector<int> code(str.length());
-    std::vector<int> bin(str.length() * 6);
+    std::vector code(str.length(), 0);
+    std::vector bin(str.length() * 6, 0);
 
     DecodeTable(str, code);
     TransferToBin(str, code, bin, 6);
@@ -149,7 +147,6 @@ int main() {
     TransferToASCII(code, bin, 8);
 
     MakeResultString(res, code);
-    OutputResult(input, kOutputChoose, res, "decryption.txt");
   } else if (input == "en") {
     std::vector<int> code(str.begin(), str.end());
     std::vector<int> bin(str.length() * 8);
@@ -160,24 +157,30 @@ int main() {
 
     TransferToBase64(end, code, bin, 6, res);
     AddExtraSymbolsInTheEnd(end, res);
-
-    OutputResult(input, kOutputChoose, res, "encryption.txt");
   }
+
+  OutputResult(input, res);
   std::cout << "You could close this app." << std::endl;
 }
 
 void OutputResult(std::string& input,
-                  const std::string& output_choose,
-                  const std::string& res,
+                  std::string_view res,
                   const std::string& filename) {
-  std::cout << output_choose << std::endl;
-  std::getline(std::cin, input);
-  if (input == "f") {
-    std::fstream fout(filename, std::ios::out);
-    fout << res;
-    fout.close();
-  } else if (input == "c") {
-    std::cout << res << std::endl;
+  const std::string kOutputChoose =
+      "Where to output the result: file or console (input f or c)?\n"
+      "It's recommended to use a file because console may not have enough buff size to display";
+  std::cout << kOutputChoose << std::endl;
+
+  while (input != "f" && input != "c") {
+    std::getline(std::cin, input);
+    if (input == "f") {
+      std::fstream fout(filename, std::ios::out);
+      fout << res;
+    } else if (input == "c") {
+      std::cout << res << std::endl;
+    } else {
+      std::cout << "Invalid option! Choose (f/c): ";
+    }
   }
 }
 
