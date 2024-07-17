@@ -147,8 +147,8 @@ int main() {
     DecodeTable(str, code);
     TransferToBin(str, code, bin, 6);
     code.assign(str.length() * 3 / 4, 0);   // 6/8 = 3/4
+    
     TransferToASCII(code, bin, 8);
-
     MakeResultString(res, code);
   } else if (input == "en") {
     std::vector<int> code(str.begin(), str.end());
