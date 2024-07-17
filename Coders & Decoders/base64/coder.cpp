@@ -125,13 +125,13 @@ void OutputResult(std::string& input,
                   const std::string& filename = "output.txt");
 int main() {
   std::ios::sync_with_stdio(false);
-  
+
   std::string input;
   std::cout << "encode or decode (en/de): ";
   while(input != "en" && input != "de") {
     getline(std::cin, input);
   }
-  
+
   std::string str;
   std::cout << "Input your string: ";
   getline(std::cin, str);
@@ -166,7 +166,7 @@ int main() {
 void OutputResult(std::string& input,
                   std::string_view res,
                   const std::string& filename) {
-  const std::string kOutputChoose =
+  constexpr std::string_view kOutputChoose =
       "Where to output the result: file or console (input f or c)?\n"
       "It's recommended to use a file because console may not have enough buff size to display";
   std::cout << kOutputChoose << std::endl;
