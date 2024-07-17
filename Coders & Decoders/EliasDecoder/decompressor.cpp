@@ -37,18 +37,16 @@ void DeleteNull(std::string& str) {
   }
 }
 
-std::vector<std::string> InDEC(std::string_view str) {
+decltype(auto) InDEC(std::string_view str) {
   std::vector<std::string> res;
-  int combo;
-  int p;
-  for (auto i = static_cast<int>(str.size() - 1); i >= 0; --i) {
+  for (auto i = std::ssize(str) - 1; i >= 0; --i) {
     if (str[i] == ' ') {
-      combo = 0;
-      p = 0;
-      for (int j = i - 1; j >= 0 && str[j] != ' '; --j) {
-        combo += (static_cast<int>(str[j]) - '0') * (1 << p++);
+      int combo = 0;
+      int pow = 0;
+      for (auto j = i - 1; j >= 0 && str[j] != ' '; --j) {
+        combo += (str[j] - '0') * (1 << pow++);
       }
-      res.push_back(std::to_string(combo));
+      res.emplace_back(std::to_string(combo));
     }
   }
   return res;
@@ -58,20 +56,20 @@ void DecodeAndOtput(const std::vector<std::string>& dec) {
   std::string res;
   std::string symb;
   std::ranges::for_each(dec, [&res](const auto& elem) { res += elem; });
-  int isfull = static_cast<int>(res.size()) % 8;
-  if (isfull != 0) {
-    int cntnon = isfull;
-    for (auto j = std::ssize(res) - 1; --cntnon >= 0; --j) {
+  auto is_full = std::ssize(res) % 8;
+  if (is_full != 0) {
+    auto cnt_nan = is_full - 1;
+    for (auto j = std::ssize(res) - 1; cnt_nan >= 0; --j, --cnt_nan) {
       symb += res[j];
     }
-    auto symbol = static_cast<unsigned char>(Transfer(stoi(symb), 10));
+    auto symbol = static_cast<unsigned char>(Transfer(std::stoi(symb), 10));
     symb.clear();
     std::cout << symbol;
   }
-  for (auto j = std::ssize(res) - isfull - 1; j >= 0; --j) {
+  for (auto j = std::ssize(res) - is_full - 1; j >= 0; --j) {
     symb += res[j];
     if (symb.size() == 8) {
-      auto symbol = static_cast<unsigned char>(Transfer(stoi(symb), 10));
+      auto symbol = static_cast<unsigned char>(Transfer(std::stoi(symb), 10));
       symb.clear();
       std::cout << symbol;
     }
