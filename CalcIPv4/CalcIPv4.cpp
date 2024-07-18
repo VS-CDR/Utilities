@@ -1,5 +1,7 @@
-#include <iostream>
 #include <array>
+#include <algorithm>
+#include <charconv>
+#include <iostream>
 #include "../fastmath.hpp"
 
 class InputExc : private std::exception {
@@ -89,8 +91,8 @@ void PrintCroppedAddress(int begin, int end, const std::array<int, 32>& arr) {
 }
 
 void ClassOfIP(const int* byte) {
-  const std::string kCommonAddressInfo("!Common address!");
-  const std::string kUniqueAddressInfo("Unique address");
+  constexpr std::string_view kCommonAddressInfo("!Common address!");
+  constexpr std::string_view kUniqueAddressInfo("Unique address");
   if (byte[0] < 128) {
     std::cout << (byte[0] == 10 ? kCommonAddressInfo : kUniqueAddressInfo)
               << '\n' << "A class:"
@@ -123,30 +125,18 @@ void ClassOfIP(const int* byte) {
   }
 }
 
-template<std::forward_iterator It, class T>
-constexpr It Find(It first, It last, const T& value) {
-  for (; first != last; ++first) {
-    if (*first == value) {
-      return first;
-    }
-  }
-  return last;
-}
-
 void InputAndProcessData(std::array<int, kNumOfQuadrants>& byte) {
   std::cout << "Input ip address: ";
   std::string input;
   std::cin >> input;
 
   auto begin_quadrant = input.begin();
-  std::forward_iterator auto
-      end_quadrant = Find(input.begin(), input.end(), '.');
+  auto end_quadrant = std::ranges::find(input, '.');
 
   for (int i = 0; i < kNumOfQuadrants; ++i) {
-    byte[i] = std::stoi(input.substr(begin_quadrant - input.begin(),
-                                     end_quadrant - input.begin()));
+    std::from_chars(begin_quadrant.base(), end_quadrant.base(), byte[i]);
     begin_quadrant = std::min(end_quadrant + 1, input.end());
-    end_quadrant = Find(begin_quadrant, input.end(), '.');
+    end_quadrant = std::find(begin_quadrant, input.end(), '.');
     if (byte[i] < 0 || byte[i] >= kMaxValue) {
       throw InputExc();
     }
@@ -165,14 +155,18 @@ int main() {
 
 void ChooseOptions(const std::array<int, kNumOfQuadrants>& byte) {
   std::cout << "CIDR y/n : ";
-  char cmd = ' ';
-  std::cin >> cmd;
-  if (cmd == 'y') {
-    std::cout << "Input CIDR: /";
-    int cidr;
-    std::cin >> cidr;
-    CIDR(byte.data(), cidr);
-  } else {
-    ClassOfIP(byte.data());
+  char cmd(' ');
+  while (cmd != 'y' && cmd != 'n') {
+    std::cin >> cmd;
+    if (cmd == 'y') {
+      std::cout << "Input CIDR: /";
+      int cidr;
+      std::cin >> cidr;
+      CIDR(byte.data(), cidr);
+    } else if (cmd == 'n') {
+      ClassOfIP(byte.data());
+    } else {
+      std::cout << "Invalid input! Choose between (y/n): ";
+    }
   }
 }
