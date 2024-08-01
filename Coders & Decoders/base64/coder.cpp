@@ -39,7 +39,7 @@ void DecodeTable(std::string_view str, std::vector<int>& code) {
 }
 
 void TransferToASCII(std::vector<int>& code,
-                     std::vector<int>& bin,
+                     const std::vector<int>& bin,
                      std::size_t radix) {
   for (std::size_t i = 0; i < code.size(); ++i) {
     for (std::size_t j = i * radix; j < (i + 1) * radix; ++j) {
@@ -52,7 +52,7 @@ void TransferToASCII(std::vector<int>& code,
 
 void TransferToBase64(std::size_t end,
                       std::vector<int>& code,
-                      std::vector<int>& bin,
+                      const std::vector<int>& bin,
                       std::size_t r,
                       std::string& res) {
   for (std::size_t i = 0; i <= end / r; ++i) {
