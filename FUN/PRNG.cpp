@@ -3,10 +3,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <algorithm>
 #include "../fastmath.hpp"
 
-using vs = std::vector<std::vector<std::string>>;
+using ms = std::vector<std::vector<std::string>>;
 using uc = unsigned char;
 
 const uc SBOX[]{
@@ -61,9 +60,9 @@ void XorWithRcon(std::string& key, int i) {
   key[0] ^= Rcon;
 }
 
-void DropData(std::string& key, std::string& xorcol) {
+void DropData(std::string& key, std::string& xor_col) {
   key.clear();
-  xorcol.clear();
+  xor_col.clear();
 }
 
 std::string To16(char arg) {
@@ -130,7 +129,7 @@ uc To10(std::string& arg) {
   return static_cast<uc>(res);
 }
 
-void MakeAStr(std::string& key, vs& table, int i) {
+void MakeAStr(std::string& key, ms& table, int i) {
   std::string radix16 = "ABCDEF";
   for (int j = 0; j < 4; ++j) {
     if (std::ranges::find_first_of(table[j][i], radix16) == table[j][i].end()) {
@@ -141,22 +140,21 @@ void MakeAStr(std::string& key, vs& table, int i) {
   }
 }
 
-void MakeAXorcol(std::string& xorcol, vs& table, int i) {
-  xorcol.clear();
+void MakeAXorcol(std::string& xor_col, ms& table, int i) {
+  xor_col.clear();
   std::string radix16 = "ABCDEF";
   for (int j = 0; j < 4; ++j) {
-    if (std::ranges::find_first_of(table[j][i - 3], radix16)
-        == table[j][i - 3].end()) {
-      xorcol += static_cast<uc>(To10(table[j][i - 3]));
+    if (std::ranges::find_first_of(table[j][i - 3], radix16) == table[j][i - 3].end()) {
+      xor_col += static_cast<uc>(To10(table[j][i - 3]));
     } else {
-      xorcol += To10(table[j][i - 3]);
+      xor_col += To10(table[j][i - 3]);
     }
   }
 }
 
 int main() {
   std::ios::sync_with_stdio(false);
-  vs table(4, std::vector<std::string>(4));
+  ms table(4, std::vector<std::string>(4));
   for (int i = 0; i < 4; ++i) {
     for (int j = 0; j < 4; ++j) {
       std::cin >> table[i][j];
@@ -164,21 +162,22 @@ int main() {
   }
 
   std::string key;
-  std::string xorcol;
+  std::string xor_col;
   bool step = true;
-  for (int i = 3; step;) {
-    DropData(key, xorcol);
+  for (int i = 3; step; ) {
+    DropData(key, xor_col);
     MakeAStr(key, table, i);
     RotWord(key);
     SubByte(key);
     XorWithRcon(key, i);
     for (int cnt = 0; cnt < 4; ++cnt) {
-      MakeAXorcol(xorcol, table, i++);
+      MakeAXorcol(xor_col, table, ++i);
       for (int j = 0; j < 4; ++j) {
-        key[j] ^= xorcol[j];
+        key[j] ^= xor_col[j];
         table[j].push_back(To16(key[j]));
       }
     }
+
     std::cout << "Create a new key: y/n?\n";
     char c;
     std::cin >> c;
