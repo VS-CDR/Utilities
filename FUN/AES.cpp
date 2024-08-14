@@ -1,4 +1,4 @@
-// A simple attempt to implement RIJNDAEL
+// A simple attempt to implement AES — rijndael with key size 128 bits and data block with size 16 bytes
 #include <algorithm>
 #include <iostream>
 #include <string>
