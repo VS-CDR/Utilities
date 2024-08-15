@@ -1,42 +1,49 @@
-namespace meta_functions {
-  //Counting Sqrt
-  template<
-    size_t Num,
-    size_t InfRoot = 0,
-    size_t SupRoot = (Num + 1) / 2,
+#include <numeric>
+#include <iostream>
+
+namespace MetaFunctions {
+//Counting Sqrt
+template<
+    ssize_t Num,
+    ssize_t InfRoot = 0,
+    ssize_t SupRoot = (Num + 1) / 2,
     bool Found = (SupRoot - InfRoot) <= 1>
-  struct Sqrt {
-    enum {
-      MidRoot = (InfRoot + SupRoot) / 2,
-      NewInf = MidRoot > Num / MidRoot ? InfRoot : MidRoot,
-      NewSup = MidRoot > Num / MidRoot ? MidRoot : SupRoot
-    };
-    static const size_t value = Sqrt<Num, NewInf, NewSup>::value;
+struct Sqrt {
+  enum class Bounds : ssize_t {
+    MidRoot = std::midpoint(InfRoot, SupRoot),
+    NewInf = MidRoot > Num / MidRoot ? InfRoot : MidRoot,
+    NewSup = MidRoot > Num / MidRoot ? MidRoot : SupRoot
   };
-  template<size_t Num, size_t InfRoot, size_t SupRoot>
-  struct Sqrt<Num, InfRoot, SupRoot, true> {
-    static const size_t value = (SupRoot * SupRoot <= Num) ? SupRoot : InfRoot;
-  };
-  
-  //Checking if Number IsPrime
-  template<size_t Num, size_t Div>
-  struct IsPrimeHelper {
-    static const size_t
-      value = Num % Div != 0 && IsPrimeHelper<Num, Div - 1>::value;
-  };
-  //Base
-  template<size_t Num>
-  struct IsPrimeHelper<Num, 1> {
-    static const size_t value = true;
-  };
-  //Main Meta-function
-  template<size_t Num>
-  struct IsPrime {
-    static const size_t value = IsPrimeHelper<Num, Sqrt<Num>::value>::value;
-  };
-  //Exception
-  template<>
-  struct IsPrime<1> {
-    static const size_t value = false;
-  };
+  static constexpr ssize_t val =
+      Sqrt<Num, static_cast<ssize_t>(Bounds::NewInf), static_cast<ssize_t>(Bounds::NewSup)>::val;
+};
+
+template<ssize_t Num, ssize_t InfRoot, ssize_t SupRoot>
+struct Sqrt<Num, InfRoot, SupRoot, true> {
+  static constexpr ssize_t val = (SupRoot * SupRoot <= Num) ? SupRoot : InfRoot;
+};
+
+template<ssize_t Num>
+inline constexpr ssize_t Sqrt_v = Sqrt<Num>::val;
+
+//Checking if Number IsPrime
+template<ssize_t Num, ssize_t Div>
+struct IsPrimeHelper {
+  static constexpr ssize_t val = Num % Div != 0 && IsPrimeHelper<Num, Div - 1>::val;
+};
+//Base
+template<ssize_t Num>
+struct IsPrimeHelper<Num, 1> {
+  static constexpr ssize_t val = true;
+};
+//Main Meta-function
+template<ssize_t Num>
+struct IsPrime {
+  static constexpr ssize_t val = IsPrimeHelper<Num, Sqrt<Num>::val>::val;
+};
+//Exception
+template<>
+struct IsPrime<1> {
+  static constexpr ssize_t val = false;
+};
 }
