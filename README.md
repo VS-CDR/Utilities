@@ -9,3 +9,4 @@ Here I keep interesting utilities that I once had to write.
 The "FUN" folder contains an attempt to implement Rijndael and something else.
 
 - [RLE impls](/FUN/RLE.cpp)
+- [AES simulator](/FUN/AES.cpp)
