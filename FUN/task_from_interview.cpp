@@ -4,18 +4,19 @@
  * Кратко условие: есть поле судоку 9x9 и нужно проверить каждый квадрат на то, что символы в нем уникальны.
 */
 
-#include <array>
+#include <bitset>
 #include <iostream>
 #include <vector>
 
 bool CheckSquare(const std::vector<std::vector<int>>& field,
                  int start_row, int start_col) {
-  std::array<int, 10> cnt{};
+  std::bitset<10> cnt;
   for (int i = start_row; i < start_row + 3; ++i) {
     for (int j = start_col; j < start_col + 3; ++j) {
-      if (++cnt[field[i][j]] > 1) {
+      if (cnt[field[i][j]]) {
         return false;
       }
+      cnt.set(field[i][j]);
     }
   }
   return true;
