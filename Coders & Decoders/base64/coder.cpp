@@ -1,11 +1,12 @@
 #include <cctype>
 #include <cmath>
+#include <concepts>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <string>
 #include <vector>
-
-#include "../fastmath.hpp"
+#include "../../fastmath.hpp"
 
 int Transfer(int arg, int& k, int radix) {
   int res = 0;
@@ -38,8 +39,7 @@ void DecodeTable(std::string_view str, std::vector<int>& code) {
   }
 }
 
-void TransferToASCII(std::vector<int>& code,
-                     const std::vector<int>& bin,
+void TransferToASCII(std::vector<int> &code, const std::vector<int>& bin,
                      std::size_t radix) {
   for (std::size_t i = 0; i < code.size(); ++i) {
     for (std::size_t j = i * radix; j < (i + 1) * radix; ++j) {
@@ -50,10 +50,8 @@ void TransferToASCII(std::vector<int>& code,
   }
 }
 
-void TransferToBase64(std::size_t end,
-                      std::vector<int>& code,
-                      const std::vector<int>& bin,
-                      std::size_t r,
+void TransferToBase64(std::size_t end, std::vector<int>& code,
+                      const std::vector<int>& bin, std::size_t r,
                       std::string& res) {
   for (std::size_t i = 0; i <= end / r; ++i) {
     for (std::size_t j = i * r; j < (i + 1) * r && j < end; ++j) {
@@ -75,19 +73,15 @@ void TransferToBase64(std::size_t end,
   }
 }
 
-void SplitIntoDigits(int& dec_power,
-                     int n,
-                     std::vector<int>& bin,
+void SplitIntoDigits(int& dec_power, int n, std::vector<int>& bin,
                      std::size_t& ind) {
   for (; dec_power > 0; n %= dec_power, dec_power /= 10, ++ind) {
     bin[ind] = n / dec_power;
   }
 }
 
-void TransferToBin(std::string_view str,
-                   std::vector<int>& code,
-                   std::vector<int>& bin,
-                   int arg) {
+void TransferToBin(std::string_view str, std::vector<int>& code,
+                   std::vector<int>& bin, int arg) {
   int dec_power = 1;
   for (std::size_t i = 0; i < str.length(); ++i) {
     code[i] = Transfer(code[i], dec_power, 2);
@@ -115,20 +109,22 @@ void TransferToBin(std::string_view str,
   }
 }
 
-void AddExtraSymbolsInTheEnd(std::size_t end, std::string& res);
+void AddExtraSymbolsInTheEnd(std::size_t end, std::string& res) {
+  if (end % 6 != 0) {
+    for (std::size_t i = 1; i < 6 - (end % 6); i <<= 1) {
+      res += '=';
+    }
+  }
+}
 
-void Format(std::string& str);
-void MakeResultString(std::string& res, const std::vector<int>& code);
-
-void OutputResult(std::string& input,
-                  std::string_view res,
-                  const std::string& filename = "output.txt");
+void OutputResult(std::string& input, std::string_view res,
+                  const std::string &filename = "output.txt");
 int main() {
   std::ios::sync_with_stdio(false);
 
   std::string input;
   std::cout << "encode or decode (en/de): ";
-  while(input != "en" && input != "de") {
+  while (input != "en" && input != "de") {
     getline(std::cin, input);
   }
 
@@ -146,16 +142,16 @@ int main() {
 
     DecodeTable(str, code);
     TransferToBin(str, code, bin, 6);
-    code.assign(str.length() * 3 / 4, 0);   // 6/8 = 3/4
-    
+    code.assign(str.length() * 3 / 4, 0); // 6/8 = 3/4
+
     TransferToASCII(code, bin, 8);
-    MakeResultString(res, code);
+    std::copy(code.begin(), code.end(), std::back_inserter(res));
   } else if (input == "en") {
     std::vector<int> code(str.begin(), str.end());
     std::vector<int> bin(str.length() * 8);
 
     TransferToBin(str, code, bin, 8);
-    std::size_t end = str.length() * 8;
+    auto end = str.length() * 8;
     code.assign((end / 6) + 1, 0);
 
     TransferToBase64(end, code, bin, 6, res);
@@ -166,12 +162,12 @@ int main() {
   std::cout << "You could close this app." << std::endl;
 }
 
-void OutputResult(std::string& input,
-                  std::string_view res,
-                  const std::string& filename) {
+void OutputResult(std::string &input, std::string_view res,
+                  const std::string &filename) {
   constexpr std::string_view kOutputChoose =
       "Where to output the result: file or console (input f or c)?\n"
-      "It's recommended to use a file because console may not have enough buff size to display";
+      "It's recommended to use a file because console may not have enough buff "
+      "size to display";
   std::cout << kOutputChoose << std::endl;
 
   while (input != "f" && input != "c") {
@@ -185,28 +181,4 @@ void OutputResult(std::string& input,
       std::cout << "Invalid option! Choose (f/c): ";
     }
   }
-}
-
-void AddExtraSymbolsInTheEnd(std::size_t end, std::string& res) {
-  if (end % 6 != 0) {
-    for (std::size_t i = 1; i < 6 - (end % 6); i <<= 1) {
-      res += '=';
-    }
-  }
-}
-
-void Format(std::string& str) {
-  for (auto iter = str.begin(); iter != str.end(); ++iter) {
-    if (*iter == '.') {
-      iter = str.insert(iter + 1, '\n');
-    }
-  }
-}
-
-void MakeResultString(std::string& res,
-                      const std::vector<int>& code) {
-  for (auto byte : code) {
-    res += static_cast<char>(byte);
-  }
-  Format(res);
 }
