@@ -2,6 +2,7 @@
 #include <iostream>
 #include <iterator>
 #include <string>
+#include <ranges>
 #include <utility>
 #include <vector>
 
@@ -13,10 +14,9 @@ int Transfer(int byte, int radix) {
   return res;
 }
 
-void Decompress(std::vector<std::string> &dec, int arg) {
+void Decompress(std::vector<std::string>& dec, int arg) {
   for (auto i = std::ssize(dec) - 1; i >= 0; --i, arg ^= 1) {
-    auto cnt = std::stoi(dec[i]);
-    dec[i].clear();
+    auto cnt = std::stoi(std::exchange(dec[i], std::string{}));
     std::fill_n(std::back_inserter(dec[i]), cnt, '0' + arg);
   }
 }
@@ -51,39 +51,38 @@ decltype(auto) InDEC(std::string_view str) {
   return res;
 }
 
-void DecodeAndOtput(const std::vector<std::string> &dec) {
-  std::string res;
+void DecodeAndOtput(const std::vector<std::string>& dec) {
+  auto joined = dec | std::views::join;
+  std::string res(joined.begin(), joined.end());
+
   std::string symb;
-  std::ranges::for_each(dec, [&res](const auto &elem) { res += elem; });
   auto is_full = std::ssize(res) % 8;
   if (is_full != 0) {
     auto cnt_nan = is_full - 1;
     for (auto j = std::ssize(res) - 1; cnt_nan >= 0; --j, --cnt_nan) {
       symb += res[j];
     }
-    auto symbol = static_cast<unsigned char>(Transfer(std::stoi(symb), 10));
-    symb.clear();
+    auto symbol = Transfer(std::stoi(std::exchange(symb, std::string{})), 10);
     std::cout << symbol;
   }
   for (auto j = std::ssize(res) - is_full - 1; j >= 0; --j) {
     symb += res[j];
     if (symb.size() == 8) {
-      auto symbol = static_cast<unsigned char>(Transfer(std::stoi(symb), 10));
-      symb.clear();
+      auto symbol = Transfer(std::stoi(std::exchange(symb, std::string{})), 10);
       std::cout << symbol;
     }
   }
   std::cout << std::endl;
 }
 
-void InputCode(std::string &code) {
+void InputCode(std::string& code) {
   std::cout << "Input your code: ";
   std::getline(std::cin, code);
 }
 
 void RemoveSpaces(std::string &str);
 
-int FirstBit(std::string &code) {
+int FirstBit(std::string& code) {
   int first_bit = code[0] == '0' ? 0 : 1;
   code.erase(0, 1);
   return first_bit;
