@@ -90,7 +90,9 @@ void TransferToBin(std::string_view str, std::vector<int>& code,
     for (std::size_t j = i * arg; j < (i + 1) * arg; ++j) {
       if (dec_power < FastPow(10, arg)) {
         if (dec_power == 0 && (isalpha(str[i]) != 0)) {
-          std::fill_n(bin.begin() + j, arg, 0);
+          for (std::size_t lim = j; j < lim + arg; ++j) {
+            bin[j] = 0;
+          }
         } else {
           int cnt = 0;
           for (int copy_p(dec_power); copy_p > 0; copy_p /= 10) {
