@@ -2,6 +2,7 @@
 #include <iostream>
 #include <iterator>
 #include <string>
+#include <utility>
 #include <vector>
 
 int Transfer(int byte, int radix) {
@@ -26,11 +27,10 @@ void DeleteNull(std::string &str) {
     if (str[i] == '0') {
       ++cnt;
       str.erase(i--, 1);
-    } else if (cnt != 0) {
-      i += ++cnt;
-      str.insert(i, " ");
-      cnt = 0;
     } else {
+      if (cnt != 0) {
+        i += std::exchange(cnt, 0);
+      }
       str.insert(++i, " ");
     }
   }
