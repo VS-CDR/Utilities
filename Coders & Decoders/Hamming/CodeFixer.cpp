@@ -44,8 +44,7 @@ void SplitInParts(std::vector<std::string>& parts, std::string_view input) {
   for (auto [BlockBegin, BlockInd] = std::pair<std::size_t, int>(0, 0);
        BlockBegin < input.length();
        BlockBegin += kBlockSize) {
-    parts[BlockInd++] = std::string(input, BlockBegin, kBlockSize);
-    ++BlockBegin;
+    parts[BlockInd++] = std::string(input, BlockBegin++, kBlockSize);
   }
 }
 
