@@ -62,14 +62,16 @@ void DecodeAndOtput(const std::vector<std::string>& dec) {
     for (auto j = std::ssize(res) - 1; cnt_nan >= 0; --j, --cnt_nan) {
       symb += res[j];
     }
-    auto symbol = Transfer(std::stoi(std::exchange(symb, std::string{})), 10);
-    std::cout << symbol;
+    std::cout << static_cast<char>(
+      Transfer(std::stoi(std::exchange(symb, std::string{})), 10)
+    );
   }
   for (auto j = std::ssize(res) - is_full - 1; j >= 0; --j) {
     symb += res[j];
     if (symb.size() == 8) {
-      auto symbol = Transfer(std::stoi(std::exchange(symb, std::string{})), 10);
-      std::cout << symbol;
+      std::cout << static_cast<char>(
+        Transfer(std::stoi(std::exchange(symb, std::string{})), 10)
+      );
     }
   }
   std::cout << std::endl;
