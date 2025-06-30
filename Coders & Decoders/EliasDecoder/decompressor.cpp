@@ -102,7 +102,7 @@ int main() {
   DecodeAndOtput(dec);
 }
 
-void RemoveSpaces(std::string &str) {
+void RemoveSpaces(std::string& str) {
   int ins_pos = 0;
   for (auto ch : str) {
     if (ch != ' ') {
